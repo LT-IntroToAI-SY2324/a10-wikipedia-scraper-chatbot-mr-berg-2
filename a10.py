@@ -103,6 +103,7 @@ def get_birth_date(name: str) -> str:
         birth date of the given person
     """
     infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
+    print(infobox_text)
     pattern = r"(?:Born\D*)(?P<birth>\d{4}-\d{2}-\d{2})"
     error_text = (
         "Page infobox has no birth information (at least none in xxxx-xx-xx format)"
@@ -110,6 +111,25 @@ def get_birth_date(name: str) -> str:
     match = get_match(infobox_text, pattern, error_text)
 
     return match.group("birth")
+
+def get_draft_year(name: str) -> str:
+    """Gets draft year of the given person (assuming NBA player)
+
+    Args:
+        name - name of the person
+
+    Returns:
+        draft year of the given person
+    """
+    infobox_text = clean_text(get_first_infobox_text(get_page_html(name)))
+    # print(infobox_text)
+    pattern = r"(?:NBA draft\D*)(?P<draft>\d{4})"
+    error_text = (
+        "Page infobox has no draft year information"
+    )
+    match = get_match(infobox_text, pattern, error_text)
+
+    return match.group("draft")
 
 
 # below are a set of actions. Each takes a list argument and returns a list of answers
@@ -127,6 +147,17 @@ def birth_date(matches: List[str]) -> List[str]:
         birth date of named person
     """
     return [get_birth_date(" ".join(matches))]
+
+def draft_year(matches: List[str]) -> List[str]:
+    """Returns draft year of named person in matches
+
+    Args:
+        matches - match from pattern of person's name to find draft year
+
+    Returns:
+        draft year of named person
+    """
+    return [get_draft_year(" ".join(matches))]
 
 
 def polar_radius(matches: List[str]) -> List[str]:
@@ -156,6 +187,7 @@ Action = Callable[[List[str]], List[Any]]
 pa_list: List[Tuple[Pattern, Action]] = [
     ("when was % born".split(), birth_date),
     ("what is the polar radius of %".split(), polar_radius),
+    ("when was % drafted".split(), draft_year),
     (["bye"], bye_action),
 ]
 
@@ -184,7 +216,7 @@ def search_pa_list(src: List[str]) -> List[str]:
 def query_loop() -> None:
     """The simple query loop. The try/except structure is to catch Ctrl-C or Ctrl-D
     characters and exit gracefully"""
-    print("Welcome to the movie database!\n")
+    print("Welcome to the wikipedia database!\n")
     while True:
         try:
             print()
